@@ -2,7 +2,7 @@ version: '3'
 
 services:
   # Datomic transactor service
-  datomic:
+  datomic-db:
     image: akiel/datomic-free:0.9.5561
     environment:
       - DATOMIC_HOST=datomic
@@ -13,11 +13,12 @@ services:
       - "4334:4334"
       - "4335:4335"
       - "4336:4336"
+      - "8282:8080"
     volumes:
       - ./datomic/data:/opt/datomic-free-0.9.5561/data
       - ./datomic/config/transactor.properties:/opt/datomic-free-0.9.5561/config/transactor.properties
     healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:4334/"]
+      test: [ "CMD", "nc", "-z", "localhost", "4334" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -28,7 +29,6 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      datomic:
-        condition: service_healthy
+      - datomic-db
     environment:
-      - DATOMIC_URI=datomic:free://datomic:4334/demo
+      - DATOMIC_URI=datomic:free://localhost:4334/demo

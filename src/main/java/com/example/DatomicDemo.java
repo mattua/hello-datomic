@@ -18,13 +18,13 @@ public class DatomicDemo {
         System.out.println("Connecting to Datomic at: " + DATOMIC_URI);
 
         // Wait for Datomic to be fully available
-        waitForDatomic();
+        Connection conn = waitForDatomic();
 
         // Create database if it doesn't exist
-        Peer.createDatabase(DATOMIC_URI);
+        //Peer.createDatabase(DATOMIC_URI);
 
         // Connect to the database
-        Connection conn = Peer.connect(DATOMIC_URI);
+
         System.out.println("Connected to Datomic!");
 
         // Set up schema
@@ -42,7 +42,7 @@ public class DatomicDemo {
         System.out.println("Datomic demo completed successfully");
     }
 
-    private static void waitForDatomic() {
+    private static Connection waitForDatomic() {
         System.out.println("Waiting for Datomic to be available...");
         boolean connected = false;
         int attempts = 0;
@@ -50,10 +50,13 @@ public class DatomicDemo {
         while (!connected && attempts < 30) {
             try {
                 Peer.createDatabase(DATOMIC_URI);
-                connected = true;
+                Connection conn = Peer.connect(DATOMIC_URI);
                 System.out.println("Datomic is available!");
+                return conn;
+
             } catch (Exception e) {
                 attempts++;
+                e.printStackTrace();
                 System.out.println("Waiting for Datomic to start... (attempt " + attempts + ")");
                 try {
                     Thread.sleep(2000);  // Wait 2 seconds between attempts
@@ -66,6 +69,7 @@ public class DatomicDemo {
         if (!connected) {
             throw new RuntimeException("Failed to connect to Datomic after multiple attempts");
         }
+        return null;
     }
 
     private static void setupSchema(Connection conn) throws ExecutionException, InterruptedException {

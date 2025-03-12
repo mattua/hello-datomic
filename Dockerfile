@@ -19,4 +19,4 @@ FROM openjdk:11-jre-slim
 COPY --from=builder /target/datomic-demo-1.0-SNAPSHOT.jar ./app.jar
 
 # Wait for Datomic to be ready and then run the application
-CMD ["java", "-jar", "app.jar"]
+CMD ["java","-Djava.security.manager=allow", "-jar", "app.jar"]
