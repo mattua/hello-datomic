@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  # Datomic transactor service
+  datomic:
+    image: akiel/datomic-free:0.9.5561
+    environment:
+      - DATOMIC_HOST=datomic
+      - DATOMIC_ALT_HOST=datomic
+      - XMS=-Xms512m
+      - XMX=-Xmx1024m
+    ports:
+      - "4334:4334"
+      - "4335:4335"
+      - "4336:4336"
+    volumes:
+      - ./datomic/data:/opt/datomic-free-0.9.5561/data
+      - ./datomic/config/transactor.properties:/opt/datomic-free-0.9.5561/config/transactor.properties
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:4334/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Java application demonstrating Datomic
+  datomic-java-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      datomic:
+        condition: service_healthy
+    environment:
+      - DATOMIC_URI=datomic:free://datomic:4334/demo
